@@ -23,3 +23,5 @@ devenv.local.yaml
 *.db
 *.db-journal
 *.csv
+
+__pycache__/
