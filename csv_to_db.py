@@ -4,6 +4,7 @@ import pandas as pd
 
 year = "2025"
 csv_file = f"{year}_statcast_cleaned.csv"
+chadwick_file = "chadwick_register.csv"
 db_file = f"{year}_statcast.db"
 
 # Create a connection to the database
@@ -11,9 +12,11 @@ conn = sqlite3.connect(db_file)
 
 # Read the CSV file into a pandas dataframe
 df = pd.read_csv(csv_file)
+chadwick_df = pd.read_csv(chadwick_file)
 
 # Write the dataframe to the database
 df.to_sql('pitches', conn, if_exists='replace', index=False)
+chadwick_df.to_sql('chadwick', conn, if_exists='replace', index=False)
 
 # Close the connection
 conn.close()

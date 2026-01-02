@@ -1,6 +1,9 @@
 from pybaseball import chadwick_register, cache
+import pandas as pd
 
-# get the register data and save to disk
-data = chadwick_register(save=True)
+cache.enable()
 
-print(cache.contents().cache_directory)
+data = chadwick_register()
+
+pd.DataFrame(data).to_csv("chadwick_register.csv", index=False)
+
