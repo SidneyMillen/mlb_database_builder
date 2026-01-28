@@ -1,54 +1,81 @@
 # Import required libraries
+import os
 import sqlite3
 import pandas as pd
 
-from schemas import pitch_schema, chadwick_schema
+from schemas import pitch_schema, chadwick_schema, bref_batting_schema, bref_pitching_schema
 
 year = "2025"
-csv_file = f"{year}_statcast_cleaned.csv"
-chadwick_file = "chadwick_register.csv"
+statcast_csv_path = f"{year}_statcast_cleaned.csv"
+chadwick_csv_path = "chadwick_register.csv"
+bref_batting_csv_path = f"bref_batting_{year}.csv"
+bref_pitching_csv_path = f"bref_pitching_{year}.csv"
 db_file = f"{year}_statcast.db"
+
+# Report which CSV files exist
+print("Checking CSV file availability...")
+files = {
+    "statcast_pitches": statcast_csv_path,
+    "chadwick": chadwick_csv_path,
+    "bref_batting": bref_batting_csv_path,
+    "bref_pitching": bref_pitching_csv_path
+}
+for name, path in files.items():
+    if os.path.exists(path):
+        print(f"  Found {name} CSV: {path}")
+    else:
+        print(f"  MISSING {name} CSV: {path}")
 
 # Create a connection to the database
 print("Connecting to database...")
 conn = sqlite3.connect(db_file)
 
-# Read the CSV file into a pandas dataframe
-print(f"Reading CSV files: {csv_file}, {chadwick_file}")
-df = pd.read_csv(csv_file)
-chadwick_df = pd.read_csv(chadwick_file)
+pitches_created = False
 
-# Create tables with custom schemas first
-print("Creating chadwick table with custom schema...")
-conn.execute(f'DROP TABLE IF EXISTS chadwick;')
-conn.execute(f'CREATE TABLE chadwick ({chadwick_schema});')
+# Conditionally read/write Chadwick data
+if os.path.exists(chadwick_csv_path):
+    print(f"Reading Chadwick CSV: {chadwick_csv_path}")
+    chadwick_df = pd.read_csv(chadwick_csv_path)
 
-print("Creating pitches table with custom schema...")
-conn.execute(f'DROP TABLE IF EXISTS pitches_{year};')
-conn.execute(f'CREATE TABLE pitches_{year} ({pitch_schema});')
+    print("Writing chadwick table to database...")
+    chadwick_df.to_sql('chadwick', conn, if_exists='replace', index=False, schema=chadwick_schema)
+else:
+    print("Skipping chadwick table creation; CSV file not found.")
 
-# Write the dataframes to the database
-print("Writing chadwick data to database...")
-# append since we just made the table with the correct schema
-chadwick_df.to_sql('chadwick', conn, if_exists="append", index=False)
+# Conditionally read/write pitches data
+if os.path.exists(statcast_csv_path):
+    print(f"Reading pitches CSV: {statcast_csv_path}")
+    df = pd.read_csv(statcast_csv_path)
 
-print("Writing pitches data to database...")
-df.to_sql(f'pitches_{year}', conn, if_exists="append", index=False)
+    print("Writing pitches table to database...")
+    df.to_sql('pitches', conn, if_exists='replace', index=False, schema=pitch_schema)
+    pitches_created = True
+else:
+    print("Skipping pitches table creation; CSV file not found.")
 
-print("Creating index on pitches table...")
-conn.execute(f'DROP INDEX IF EXISTS idx_pitches_game_pk_{year}')
-conn.execute(f'CREATE INDEX idx_pitches_game_pk_{year} ON pitches_{year}(game_pk);')
+# Create index only if pitches table was created
+if pitches_created:
+    print("Creating index on pitches table...")
+    conn.execute('CREATE INDEX idx_pitches_game_pk ON pitches(game_pk);')
+else:
+    print("Skipping index creation; no pitches table created.")
 
-print("Creating view of batters in chadwick for " )
-conn.execute(f'DROP VIEW IF EXISTS batters_in_chadwick_{year}')
-conn.execute(f'CREATE VIEW batters_in_chadwick_{year} AS SELECT * FROM chadwick WHERE key_mlbam IN (SELECT DISTINCT batter FROM pitches_{year} WHERE batter IS NOT NULL);')
+if os.path.exists(bref_batting_csv_path):
+    print("Writing bref batting csv")
+    bref_bat_df = pd.read_csv(bref_batting_csv_path)
+    bref_bat_df.to_sql('bref_batting', conn, if_exists='replace', index=False, schema=bref_batting_schema)
+else:
+    print(f"{bref_batting_csv_path} not found")
 
-print("Creating view of pitchers in chadwick")
-conn.execute(f'DROP VIEW IF EXISTS pitchers_in_chadwick_{year}')
-conn.execute(f'CREATE VIEW pitchers_in_chadwick_{year} AS SELECT * FROM chadwick WHERE key_mlbam IN (SELECT DISTINCT pitcher FROM pitches_{year} WHERE pitcher IS NOT NULL);')
+if os.path.exists(bref_pitching_csv_path):
+    print("Writing bref pitching csv")
+    bref_pitch_df = pd.read_csv(bref_pitching_csv_path)
+    bref_pitch_df.to_sql('bref_pitching', conn, if_exists='replace', index=False, schema=bref_pitching_schema)
+else:
+    print(f"{bref_pitching_csv_path} not found")
 
 # Close the connection
 print("Closing connection to database.")
 conn.close()
 
-print(f"Data successfully written to {db_file}")
+print(f"Finished writing available data to {db_file}")
