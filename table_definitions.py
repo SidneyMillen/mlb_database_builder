@@ -1,16 +1,18 @@
 # not sure whats best for a PK, key_mlbam + name_last is not unique and there are nulls in key_bbref
-chadwick_schema = """
-name_last TEXT,
-name_first TEXT,
-key_mlbam INTEGER,
-key_retro TEXT,
-key_bbref TEXT,
-key_fangraphs TEXT,
-mlb_played_first INTEGER,
-mlb_played_last INTEGER
-"""
+chadwick_definition = """
+CREATE TABLE "chadwick" (
+	"name_last"	TEXT,
+	"name_first"	TEXT,
+	"key_mlbam"	INTEGER,
+	"key_retro"	TEXT,
+	"key_bbref"	TEXT,
+	"key_fangraphs"	INTEGER,
+	"mlb_played_first"	REAL,
+	"mlb_played_last"	REAL
+);"""
 
-pitch_schema = """
+pitch_definition = """
+CREATE TABLE "pitches" (
 pitch_type TEXT,
 game_date TEXT,
 release_speed REAL,
@@ -124,41 +126,46 @@ intercept_ball_minus_batter_pos_y_inches REAL,
 PRIMARY KEY (game_pk, at_bat_number, pitch_number),
 FOREIGN KEY (pitcher) REFERENCES chadwick(key_mlbam),
 FOREIGN KEY (batter) REFERENCES chadwick(key_mlbam)
+);
 """
 
-bref_batting_schema = """
-    "Name"	TEXT,
-    "Age"	INTEGER,
-    "#days"	INTEGER,
-    "Lev"	TEXT,
-    "Tm"	TEXT,
-    "G"	INTEGER,
-    "PA"	INTEGER,
-    "AB"	INTEGER,
-    "R"	INTEGER,
-    "H"	INTEGER,
-    "2B"	INTEGER,
-    "3B"	INTEGER,
-    "HR"	INTEGER,
-    "RBI"	INTEGER,
-    "BB"	INTEGER,
-    "IBB"	INTEGER,
-    "SO"	INTEGER,
-    "HBP"	INTEGER,
-    "SH"	INTEGER,
-    "SF"	INTEGER,
-    "GDP"	INTEGER,
-    "SB"	INTEGER,
-    "CS"	INTEGER,
-    "BA"	REAL,
-    "OBP"	REAL,
-    "SLG"	REAL,
-    "OPS"	REAL,
-    "mlbID"	INTEGER,
-    PRIMARY KEY("mlbID")
+bref_batting_definition = """
+CREATE TABLE "bref_batting" (
+	"Name"	TEXT,
+	"Age"	INTEGER,
+	"#days"	INTEGER,
+	"Lev"	TEXT,
+	"Tm"	TEXT,
+	"G"	INTEGER,
+	"PA"	INTEGER,
+	"AB"	INTEGER,
+	"R"	INTEGER,
+	"H"	INTEGER,
+	"2B"	INTEGER,
+	"3B"	INTEGER,
+	"HR"	INTEGER,
+	"RBI"	INTEGER,
+	"BB"	INTEGER,
+	"IBB"	INTEGER,
+	"SO"	INTEGER,
+	"HBP"	INTEGER,
+	"SH"	INTEGER,
+	"SF"	INTEGER,
+	"GDP"	INTEGER,
+	"SB"	INTEGER,
+	"CS"	INTEGER,
+	"BA"	REAL,
+	"OBP"	REAL,
+	"SLG"	REAL,
+	"OPS"	REAL,
+	"mlbID"	INTEGER,
+	PRIMARY KEY("mlbID"),
+	FOREIGN KEY("mlbID") REFERENCES chadwick(key_mlbam)
+);
 """
 
-bref_pitching_schema = """
+bref_pitching_definition= """
+CREATE TABLE "bref_pitching" (
 	"Name"	TEXT,
 	"Age"	INTEGER,
 	"#days"	INTEGER,
@@ -200,5 +207,6 @@ bref_pitching_schema = """
 	"SO9"	REAL,
 	"SO/W"	REAL,
 	"mlbID"	INTEGER,
-	PRIMARY KEY("mlbID")
-"""
+	PRIMARY KEY("mlbID"),
+	FOREIGN KEY("mlbID") REFERENCES chadwick(key_mlbam)
+);"""
