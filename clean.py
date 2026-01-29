@@ -1,4 +1,4 @@
-"""Clean and analyze Statcast data from CSV."""
+"""Clean and analyze Statcast data from CSV. Currently optimized for recent (2025) statcast data and may break with older schemas"""
 
 import pandas as pd
 
@@ -16,12 +16,7 @@ def debug_print(pitches):
     print("-"*60)
     print(f"Total columns: {len(pitches.columns)}")
     for i, col in enumerate(pitches.columns, 1):
-        print(f"{i:3d}. {col}")
-    
-    print("\n" + "-"*60)
-    print("DATA TYPES")
-    print("-"*60)
-    print(pitches.dtypes)
+        print(f"{i:3d}. {col}: {pitches.dtypes.iloc[i-1]}")
     
     print("\n" + "-"*60)
     print("FIRST FEW ROWS")
@@ -39,10 +34,10 @@ def debug_print(pitches):
     missing = pitches.isnull().sum()
     missing_pct = (missing / len(pitches) * 100).round(2)
     missing_df = pd.DataFrame({
-        'Missing Count': missing,
-        'Missing %': missing_pct
+        'NA Count': missing,
+        'NA %': missing_pct
     })
-    print(missing_df[missing_df['Missing Count'] > 0].sort_values('Missing Count', ascending=False))
+    print(missing_df[missing_df['NA Count'] > 0].sort_values('NA Count', ascending=False))
 
 def main():
     """Load Statcast data and display debug information."""

@@ -1,15 +1,19 @@
+from statcastcsv import index_pitches
+
+
 # not sure whats best for a PK, key_mlbam + name_last is not unique and there are nulls in key_bbref
 chadwick_definition = """
 CREATE TABLE "chadwick" (
-	"name_last"	TEXT,
-	"name_first"	TEXT,
-	"key_mlbam"	INTEGER,
-	"key_retro"	TEXT,
-	"key_bbref"	TEXT,
-	"key_fangraphs"	INTEGER,
-	"mlb_played_first"	REAL,
-	"mlb_played_last"	REAL
-);"""
+"name_last"	TEXT,
+"name_first"	TEXT,
+"key_mlbam"	INTEGER,
+"key_retro"	TEXT,
+"key_bbref"	TEXT,
+"key_fangraphs"	INTEGER,
+"mlb_played_first"	REAL,
+"mlb_played_last"	REAL
+);
+"""
 
 pitch_definition = """
 CREATE TABLE "pitches" (
@@ -123,90 +127,102 @@ attack_direction REAL,
 swing_path_tilt REAL,
 intercept_ball_minus_batter_pos_x_inches REAL,
 intercept_ball_minus_batter_pos_y_inches REAL,
+"""
+
+#use different PK based on option in ./statcastcsv.py
+if index_pitches:
+    pitch_definition += """
+pitch_index INTEGER PRIMARY KEY,
+    """
+else:
+    pitch_definition += """
 PRIMARY KEY (game_pk, at_bat_number, pitch_number),
+    """
+
+pitch_definition += """
 FOREIGN KEY (pitcher) REFERENCES chadwick(key_mlbam),
 FOREIGN KEY (batter) REFERENCES chadwick(key_mlbam)
 );
 """
-
 bref_batting_definition = """
 CREATE TABLE "bref_batting" (
-	"Name"	TEXT,
-	"Age"	INTEGER,
-	"#days"	INTEGER,
-	"Lev"	TEXT,
-	"Tm"	TEXT,
-	"G"	INTEGER,
-	"PA"	INTEGER,
-	"AB"	INTEGER,
-	"R"	INTEGER,
-	"H"	INTEGER,
-	"2B"	INTEGER,
-	"3B"	INTEGER,
-	"HR"	INTEGER,
-	"RBI"	INTEGER,
-	"BB"	INTEGER,
-	"IBB"	INTEGER,
-	"SO"	INTEGER,
-	"HBP"	INTEGER,
-	"SH"	INTEGER,
-	"SF"	INTEGER,
-	"GDP"	INTEGER,
-	"SB"	INTEGER,
-	"CS"	INTEGER,
-	"BA"	REAL,
-	"OBP"	REAL,
-	"SLG"	REAL,
-	"OPS"	REAL,
-	"mlbID"	INTEGER,
-	PRIMARY KEY("mlbID"),
-	FOREIGN KEY("mlbID") REFERENCES chadwick(key_mlbam)
+"Name"	TEXT,
+"Age"	INTEGER,
+"#days"	INTEGER,
+"Lev"	TEXT,
+"Tm"	TEXT,
+"G"	INTEGER,
+"PA"	INTEGER,
+"AB"	INTEGER,
+"R"	INTEGER,
+"H"	INTEGER,
+"2B"	INTEGER,
+"3B"	INTEGER,
+"HR"	INTEGER,
+"RBI"	INTEGER,
+"BB"	INTEGER,
+"IBB"	INTEGER,
+"SO"	INTEGER,
+"HBP"	INTEGER,
+"SH"	INTEGER,
+"SF"	INTEGER,
+"GDP"	INTEGER,
+"SB"	INTEGER,
+"CS"	INTEGER,
+"BA"	REAL,
+"OBP"	REAL,
+"SLG"	REAL,
+"OPS"	REAL,
+"mlbID"	INTEGER,
+PRIMARY KEY("mlbID"),
+FOREIGN KEY("mlbID") REFERENCES chadwick(key_mlbam)
 );
 """
 
 bref_pitching_definition= """
 CREATE TABLE "bref_pitching" (
-	"Name"	TEXT,
-	"Age"	INTEGER,
-	"#days"	INTEGER,
-	"Lev"	TEXT,
-	"Tm"	TEXT,
-	"G"	INTEGER,
-	"GS"	INTEGER,
-	"W"	REAL,
-	"L"	REAL,
-	"SV"	REAL,
-	"IP"	REAL,
-	"H"	INTEGER,
-	"R"	INTEGER,
-	"ER"	INTEGER,
-	"BB"	INTEGER,
-	"SO"	INTEGER,
-	"HR"	INTEGER,
-	"HBP"	INTEGER,
-	"ERA"	REAL,
-	"AB"	INTEGER,
-	"2B"	INTEGER,
-	"3B"	INTEGER,
-	"IBB"	INTEGER,
-	"GDP"	INTEGER,
-	"SF"	INTEGER,
-	"SB"	INTEGER,
-	"CS"	INTEGER,
-	"PO"	INTEGER,
-	"BF"	INTEGER,
-	"Pit"	INTEGER,
-	"Str"	REAL,
-	"StL"	REAL,
-	"StS"	REAL,
-	"GB/FB"	REAL,
-	"LD"	REAL,
-	"PU"	REAL,
-	"WHIP"	REAL,
-	"BAbip"	REAL,
-	"SO9"	REAL,
-	"SO/W"	REAL,
-	"mlbID"	INTEGER,
-	PRIMARY KEY("mlbID"),
-	FOREIGN KEY("mlbID") REFERENCES chadwick(key_mlbam)
-);"""
+"Name"	TEXT,
+"Age"	INTEGER,
+"#days"	INTEGER,
+"Lev"	TEXT,
+"Tm"	TEXT,
+"G"	INTEGER,
+"GS"	INTEGER,
+"W"	REAL,
+"L"	REAL,
+"SV"	REAL,
+"IP"	REAL,
+"H"	INTEGER,
+"R"	INTEGER,
+"ER"	INTEGER,
+"BB"	INTEGER,
+"SO"	INTEGER,
+"HR"	INTEGER,
+"HBP"	INTEGER,
+"ERA"	REAL,
+"AB"	INTEGER,
+"2B"	INTEGER,
+"3B"	INTEGER,
+"IBB"	INTEGER,
+"GDP"	INTEGER,
+"SF"	INTEGER,
+"SB"	INTEGER,
+"CS"	INTEGER,
+"PO"	INTEGER,
+"BF"	INTEGER,
+"Pit"	INTEGER,
+"Str"	REAL,
+"StL"	REAL,
+"StS"	REAL,
+"GB/FB"	REAL,
+"LD"	REAL,
+"PU"	REAL,
+"WHIP"	REAL,
+"BAbip"	REAL,
+"SO9"	REAL,
+"SO/W"	REAL,
+"mlbID"	INTEGER,
+PRIMARY KEY("mlbID"),
+FOREIGN KEY("mlbID") REFERENCES chadwick(key_mlbam)
+);
+"""

@@ -5,7 +5,7 @@
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = with pkgs; [ git ruff zlib ];
+  packages = with pkgs; [ git ruff zlib sqlite ];
 
   languages.python = {
     enable = true;
@@ -13,8 +13,6 @@
     venv.enable = true;
     venv.requirements = ''
       pybaseball
-      scipy
-      numpy
       pandas
     '';
 
