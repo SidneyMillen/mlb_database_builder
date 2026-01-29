@@ -3,7 +3,9 @@ import pandas as pd
 
 cache.enable()
 
-data = chadwick_register()
+data = pd.DataFrame(chadwick_register())
 
-pd.DataFrame(data).to_csv("chadwick_register.csv", index=False)
+data = data[data['key_mlbam'] != -1]
+
+data.to_csv("chadwick_register.csv", index=False)
 

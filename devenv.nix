@@ -5,7 +5,7 @@
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = with pkgs; [ git ruff zlib ];
+  packages = with pkgs; [ duckdb ];
 
   languages.python = {
     enable = true;
@@ -14,6 +14,7 @@
     venv.requirements = ''
       pybaseball
       scipy
+      duckdb
       numpy
       pandas
     '';

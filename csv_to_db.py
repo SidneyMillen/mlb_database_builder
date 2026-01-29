@@ -1,6 +1,6 @@
 # Import required libraries
 import os
-import sqlite3
+import duckdb
 import pandas as pd
 
 from table_definitions import pitch_definition, chadwick_definition, bref_batting_definition, bref_pitching_definition
@@ -10,11 +10,19 @@ statcast_csv_path = f"{year}_statcast_cleaned.csv"
 chadwick_csv_path = "chadwick_register.csv"
 bref_batting_csv_path = f"bref_batting_{year}.csv"
 bref_pitching_csv_path = f"bref_pitching_{year}.csv"
-db_file = f"{year}_statcast.db"
+db_file = f"baseball_{year}.duckdb"
 
 def drop_table(name):
-    conn.execute(f"""DROP TABLE IF EXISTS \"{name}\"""")
+    conn.execute(f"DROP TABLE IF EXISTS \"{name}\"")
 
+# Create a connection to the database
+print("Connecting to database...")
+conn = duckdb.connect(database = db_file, read_only = False)
+
+drop_table('pitches')
+drop_table('bref_batting')
+drop_table('bref_pitching')
+drop_table('chadwick')
 
 # Report which CSV files exist
 print("Checking CSV file availability...")
@@ -30,33 +38,23 @@ for name, path in files.items():
     else:
         print(f"  MISSING {name} CSV: {path}")
 
-# Create a connection to the database
-print("Connecting to database...")
-conn = sqlite3.connect(db_file)
-
 pitches_created = False
 
 # Conditionally read/write Chadwick data
 if os.path.exists(chadwick_csv_path):
     print(f"Reading Chadwick CSV: {chadwick_csv_path}")
-    chadwick_df = pd.read_csv(chadwick_csv_path)
-
-    drop_table('chadwick')
     print("Writing chadwick table to database...")
-    conn.execute(chadwick_definition)
-    chadwick_df.to_sql('chadwick', conn, if_exists='append', index=False)
+    conn.sql(chadwick_definition)
+    conn.sql(f"INSERT INTO chadwick (SELECT * FROM '{chadwick_csv_path}')")
 else:
     print("Skipping chadwick table creation; CSV file not found.")
 
 # Conditionally read/write pitches data
 if os.path.exists(statcast_csv_path):
     print(f"Reading pitches CSV: {statcast_csv_path}")
-    df = pd.read_csv(statcast_csv_path)
-
     print("Writing pitches table to database...")
-    drop_table('pitches')
-    conn.execute(pitch_definition)
-    df.to_sql('pitches', conn, if_exists='append', index=False)
+    conn.sql(pitch_definition)
+    conn.sql(f"INSERT INTO pitches (SELECT * FROM '{statcast_csv_path}')")
     pitches_created = True
 else:
     print("Skipping pitches table creation; CSV file not found.")
@@ -64,29 +62,24 @@ else:
 # Create index only if pitches table was created
 if pitches_created:
     print("Creating index on pitches table...")
-    conn.execute('CREATE INDEX idx_pitches_game_pk ON pitches(game_pk);')
+    conn.sql('CREATE INDEX idx_pitches_game_pk ON pitches(game_pk);')
 else:
     print("Skipping index creation; no pitches table created.")
 
 if os.path.exists(bref_batting_csv_path):
     print("Writing bref batting csv")
-    bref_bat_df = pd.read_csv(bref_batting_csv_path)
-    
-    drop_table('bref_batting')
-    conn.execute(bref_batting_definition)
-    bref_bat_df.to_sql('bref_batting', conn, if_exists='append', index=False)
+    conn.sql(bref_batting_definition)
+    conn.sql(f"INSERT INTO bref_batting (SELECT * FROM '{bref_batting_csv_path}')")
 else:
     print(f"{bref_batting_csv_path} not found")
 
 if os.path.exists(bref_pitching_csv_path):
     print("Writing bref pitching csv")
-    bref_pitch_df = pd.read_csv(bref_pitching_csv_path)
-    
-    drop_table('bref_pitching')
-    conn.execute(bref_pitching_definition)
-    bref_pitch_df.to_sql('bref_pitching', conn, if_exists='append', index=False)
+    conn.sql(bref_pitching_definition)
+    conn.sql(f"INSERT INTO bref_pitching (SELECT * FROM '{bref_pitching_csv_path}')")
 else:
     print(f"{bref_pitching_csv_path} not found")
+
 
 # Close the connection
 print("Closing connection to database.")
