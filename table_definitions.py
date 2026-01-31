@@ -1,4 +1,4 @@
-from statcastcsv import index_pitches
+from statcast import index_pitches
 
 
 # not sure whats best for a PK, key_mlbam + name_last is not unique and there are nulls in key_bbref
@@ -144,6 +144,7 @@ FOREIGN KEY (pitcher) REFERENCES chadwick(key_mlbam),
 FOREIGN KEY (batter) REFERENCES chadwick(key_mlbam)
 );
 """
+
 bref_batting_definition = """
 CREATE TABLE "bref_batting" (
 "Name"	TEXT,

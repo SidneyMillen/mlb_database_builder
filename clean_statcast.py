@@ -2,6 +2,8 @@
 
 import pandas as pd
 
+from config import year
+
 
 def debug_print(pitches):
         # Debug printing - data shape and structure
@@ -41,7 +43,6 @@ def debug_print(pitches):
 
 def main():
     """Load Statcast data and display debug information."""
-    year = "2025"
     csv_file = f"{year}_statcast.csv"
     
     print(f"Loading data from {csv_file}...")
