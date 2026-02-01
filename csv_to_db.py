@@ -2,95 +2,65 @@
 
 from config import year
 from statcast import index_pitches
+import fangraphs
 
 # Import required libraries
 import os
 import sqlite3
 import pandas as pd
 
-from table_definitions import pitch_definition, chadwick_definition, bref_batting_definition, bref_pitching_definition
-
-statcast_csv_path = f"{year}_statcast_cleaned.csv"
-chadwick_csv_path = "chadwick_register.csv"
-bref_batting_csv_path = f"bref_batting_{year}.csv"
-bref_pitching_csv_path = f"bref_pitching_{year}.csv"
-db_file = f"{year}_statcast.db"
+from table_definitions import *
 
 def drop_table(name):
-    conn.execute(f"""DROP TABLE IF EXISTS \"{name}\"""")
-
-
-# Report which CSV files exist
-print("Checking CSV file availability...")
-files = {
-    "statcast_pitches": statcast_csv_path,
-    "chadwick": chadwick_csv_path,
-    "bref_batting": bref_batting_csv_path,
-    "bref_pitching": bref_pitching_csv_path
-}
-for name, path in files.items():
-    if os.path.exists(path):
-        print(f"  Found {name} CSV: {path}")
-    else:
-        print(f"  MISSING {name} CSV: {path}")
-
-# Create a connection to the database
-print("Connecting to database...")
-conn = sqlite3.connect(db_file)
+    conn.execute(f"DROP TABLE IF EXISTS \"{name}\"")
 
 pitches_created = False
 
-# Conditionally read/write Chadwick data
-if os.path.exists(chadwick_csv_path):
-    print(f"Reading Chadwick CSV: {chadwick_csv_path}")
-    chadwick_df = pd.read_csv(chadwick_csv_path)
+class DataSource:
+    def __init__(self, path, table_name, definition, index=False, index_label=None, extra_setup=lambda conn: None):
+        self.path = path
+        self.table_name = table_name
+        self.definition = definition
+        self.index = index
+        self.extra_setup = extra_setup
 
-    drop_table('chadwick')
-    print("Writing chadwick table to database...")
-    conn.execute(chadwick_definition)
-    chadwick_df.to_sql('chadwick', conn, if_exists='append', index=False)
-else:
-    print("Skipping chadwick table creation; CSV file not found.")
+statcast_ds = DataSource(f"{year}_statcast_cleaned.csv", "statcast_pitches", pitch_definition, index_pitches, "pitch_index", lambda conn: conn.execute('CREATE INDEX idx_pitches_game_pk ON statcast_pitches(game_pk);'))
+chadwick_ds = DataSource("chadwick_register.csv", "chadwick", chadwick_definition)
+bref_batting_ds = DataSource(f"bref_batting_{year}.csv", "bref_batting", bref_batting_definition)
+bref_pitching_ds = DataSource(f"bref_pitching_{year}.csv", "bref_pitching", bref_pitching_definition)
+fangraphs_batting_ds = DataSource(fangraphs.batter_data_file, "fangraphs_batting", fangraphs_batting_definition)
+fangraphs_pitching_ds = DataSource(fangraphs.pitcher_data_file, "fangraphs_pitching", fangraphs_pitching_definition)
+fangraphs_fielding_ds = DataSource(fangraphs.fielder_data_file, "fangraphs_fielding", fangraphs_fielding_definition)
+fangraphs_team_batting_ds = DataSource(fangraphs.team_batting_data_file, "fangraphs_team_batting", fangraphs_team_batting_definition)
+fangraphs_team_pitching_ds = DataSource(fangraphs.team_pitching_data_file, "fangraphs_team_pitching", fangraphs_team_pitching_definition)
+fangraphs_team_fielding_ds = DataSource(fangraphs.team_fielding_data_file, "fangraphs_team_fielding", fangraphs_team_fielding_definition)
 
-# Conditionally read/write pitches data
-if os.path.exists(statcast_csv_path):
-    print(f"Reading pitches CSV: {statcast_csv_path}")
-    df = pd.read_csv(statcast_csv_path)
+data_sources = [statcast_ds, chadwick_ds, bref_batting_ds, bref_pitching_ds, fangraphs_batting_ds, fangraphs_pitching_ds, fangraphs_fielding_ds, fangraphs_team_batting_ds, fangraphs_team_pitching_ds, fangraphs_team_fielding_ds]
 
-    print("Writing pitches table to database...")
-    drop_table('pitches')
-    conn.execute(pitch_definition)
-    df.to_sql('pitches', conn, if_exists='append', index=index_pitches, index_label='pitch_index')
-    pitches_created = True
-else:
-    print("Skipping pitches table creation; CSV file not found.")
+db_file = f"{year}_baseball.db"
 
-# Create index only if pitches table was created
-if pitches_created:
-    print("Creating index on pitches table...")
-    conn.execute('CREATE INDEX idx_pitches_game_pk ON pitches(game_pk);')
-else:
-    print("Skipping index creation; no pitches table created.")
+for ds in data_sources:
+    if os.path.exists(ds.path):
+        ds.exists = True
+        print(f"  Found {ds.table_name} CSV: {ds.path}")
+    else:
+        ds.exists = False
+        print(f"  MISSING {ds.table_name} CSV: {ds.path}")
 
-if os.path.exists(bref_batting_csv_path):
-    print("Writing bref batting csv")
-    bref_bat_df = pd.read_csv(bref_batting_csv_path)
-    
-    drop_table('bref_batting')
-    conn.execute(bref_batting_definition)
-    bref_bat_df.to_sql('bref_batting', conn, if_exists='append', index=False)
-else:
-    print(f"{bref_batting_csv_path} not found")
 
-if os.path.exists(bref_pitching_csv_path):
-    print("Writing bref pitching csv")
-    bref_pitch_df = pd.read_csv(bref_pitching_csv_path)
-    
-    drop_table('bref_pitching')
-    conn.execute(bref_pitching_definition)
-    bref_pitch_df.to_sql('bref_pitching', conn, if_exists='append', index=False)
-else:
-    print(f"{bref_pitching_csv_path} not found")
+print("Connecting to database...")
+conn = sqlite3.connect(db_file)
+
+for ds in data_sources:
+    if ds.exists:
+        print(f"  Reading {ds.table_name} CSV: {ds.path}")
+        df = pd.read_csv(ds.path)
+        drop_table(ds.table_name)
+        df.to_sql(ds.table_name, conn, if_exists='append', index=ds.index)
+        ds.extra_setup(conn)
+        print(f"  {ds.table_name} written to database")
+    else:
+        print(f"  skipping {ds.table_name}")
 
 # Close the connection
 print("Closing connection to database.")
