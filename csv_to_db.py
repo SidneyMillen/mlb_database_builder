@@ -56,7 +56,8 @@ for ds in data_sources:
         print(f"  Reading {ds.table_name} CSV: {ds.path}")
         df = pd.read_csv(ds.path)
         drop_table(ds.table_name)
-        df.to_sql(ds.table_name, conn, if_exists='append', index=ds.index)
+        conn.execute(ds.definition)
+        df.to_sql(ds.table_name, conn, if_exists='append', index=ds.index, index_label="idx")
         ds.extra_setup(conn)
         print(f"  {ds.table_name} written to database")
     else:

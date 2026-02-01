@@ -5,4 +5,4 @@ SELECT inning, outs_when_up,
 bs.on_1b = (p.on_1b IS NOT NULL)
 AND bs.on_2b = (p.on_2b IS NOT NULL)
 and bs.on_3b = (p.on_3b IS NOT NULL)) as basepath_state_id,
-inning_topbot, 'index' from statcast_pitches p
+inning_topbot, idx from statcast_pitches p
