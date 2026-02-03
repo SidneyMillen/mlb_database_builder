@@ -26,3 +26,4 @@ devenv.local.yaml
 *.csv
 
 __pycache__/
+/.env

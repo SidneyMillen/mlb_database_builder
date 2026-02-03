@@ -3,11 +3,14 @@
 from config import year
 from statcast import index_pitches
 import fangraphs
+import retrosheet
 
 # Import required libraries
 import os
 import sqlite3
 import pandas as pd
+
+import retrosheet
 
 from table_definitions import *
 
@@ -17,11 +20,13 @@ def drop_table(name):
 pitches_created = False
 
 class DataSource:
-    def __init__(self, path, table_name, definition, index=False, index_label=None, extra_setup=lambda conn: None):
+    def __init__(self, path, table_name, definition, index=False, has_header=True, names=None, extra_setup=lambda conn: None):
         self.path = path
         self.table_name = table_name
         self.definition = definition
         self.index = index
+        self.has_header = has_header
+        self.names = names
         self.extra_setup = extra_setup
 
 statcast_ds = DataSource(f"{year}_statcast_cleaned.csv", "statcast_pitches", pitch_definition, index_pitches, "pitch_index", lambda conn: conn.execute('CREATE INDEX idx_pitches_game_pk ON statcast_pitches(game_pk);'))
@@ -34,8 +39,23 @@ fangraphs_fielding_ds = DataSource(fangraphs.fielder_data_file, "fangraphs_field
 fangraphs_team_batting_ds = DataSource(fangraphs.team_batting_data_file, "fangraphs_team_batting", fangraphs_team_batting_definition)
 fangraphs_team_pitching_ds = DataSource(fangraphs.team_pitching_data_file, "fangraphs_team_pitching", fangraphs_team_pitching_definition)
 fangraphs_team_fielding_ds = DataSource(fangraphs.team_fielding_data_file, "fangraphs_team_fielding", fangraphs_team_fielding_definition)
+retrosheet_game_log_ds = DataSource(retrosheet.game_log_file, "retrosheet_game_logs", retrosheet_game_log_definition, index=True, has_header=False, names=retrosheet.game_log_columns)
+retrosheet_park_ds = DataSource(retrosheet.park_codes_file, "retrosheet_park_codes", retrosheet_park_definition)
 
-data_sources = [statcast_ds, chadwick_ds, bref_batting_ds, bref_pitching_ds, fangraphs_batting_ds, fangraphs_pitching_ds, fangraphs_fielding_ds, fangraphs_team_batting_ds, fangraphs_team_pitching_ds, fangraphs_team_fielding_ds]
+data_sources = [
+    # statcast_ds,
+    # chadwick_ds,
+    # bref_batting_ds,
+    # bref_pitching_ds,
+    # fangraphs_batting_ds,
+    # fangraphs_pitching_ds,
+    # fangraphs_fielding_ds,
+    # fangraphs_team_batting_ds,
+    # fangraphs_team_pitching_ds,
+    # fangraphs_team_fielding_ds,
+    retrosheet_game_log_ds,
+    retrosheet_park_ds
+]
 
 db_file = f"{year}_baseball.db"
 
@@ -54,7 +74,10 @@ conn = sqlite3.connect(db_file)
 for ds in data_sources:
     if ds.exists:
         print(f"  Reading {ds.table_name} CSV: {ds.path}")
-        df = pd.read_csv(ds.path)
+        if not ds.has_header:
+            df = pd.read_csv(ds.path,header=0, names=ds.names)
+        else:
+            df = pd.read_csv(ds.path)
         drop_table(ds.table_name)
         conn.execute(ds.definition)
         df.to_sql(ds.table_name, conn, if_exists='append', index=ds.index, index_label="idx")

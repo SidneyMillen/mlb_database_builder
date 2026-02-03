@@ -3,6 +3,9 @@
 
 The goal of this project is to provide for anyone the ability to construct a baseball database suitable for advanced analytics quickly, flexibly, and easily. This project is in an early stage of development and may contain bugs/errors.
 
+* Disclaimers/notes
+this project (at the time of writing) depends heavily on the pybaseball python library, which is not particularly well maintained these days. While I am considering either forking it and maintaining it myself, or switching some functions to the (slighly more maintained but still not as much as I'd hope) baseballr R library, I haven't gotten around to either of these options yet. Functionality may be limited until this situation is improved, either by myself or others. One particular point of weakness in pybaseball at the moment is the functions to pull from retrosheet, many of which will fail. I have implemented these functions myself for now, but again I am heavily considering just forking and updating pybaseball.
+
 * Dependencies/Setup
 The recommended way to set up this environment is to use [[https://devenv.sh/][Devenv]] or a nix shell to use the nix environment provided.
 
