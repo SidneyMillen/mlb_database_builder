@@ -20,6 +20,8 @@ devenv.local.yaml
 # pre-commit
 .pre-commit-config.yaml
 
+config.py
+
 *.db
 *.db-journal
 *.duckdb

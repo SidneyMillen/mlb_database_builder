@@ -11,11 +11,15 @@ The recommended way to set up this environment is to use [[https://devenv.sh/][D
 
 You may also install python with the pandas and pybaseball libraries, and sqlite
 
+
 * Usage
 The project is mainly a set of scripts that are intended to be run in a specific order. The general workflow will consist of using the scripts that pull data into csv files first, cleaning them if needed, and then generating the DB
 
 ** Configuration
-You can edit the variables in config.py to change all the scripts. More documentation will be added as this functionality is improved. right now you can set a single year to pull all data from.
+⚠️ *You must copy config.example.py to config.py, or most scripts will not be able to run* ⚠️
+After copying the example, you are freely able to edit config.py to alter the behaviour of most of the scripts
+
+More documentation will be added as this functionality is improved. right now you can set a single year to pull all data from.
 
 ** Data pulling scripts
 These scripts pull csv files from various sources and should generally be the first ones you run. You can run as many or as few of these as you'd like
