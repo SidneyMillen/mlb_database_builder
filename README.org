@@ -17,9 +17,11 @@ The project is mainly a set of scripts that are intended to be run in a specific
 
 ** Configuration
 ⚠️ *You must copy config.example.py to config.py, or most scripts will not be able to run* ⚠️
-After copying the example, you are freely able to edit config.py to alter the behaviour of most of the scripts
+This can be done either manually, or using setup.py. setup.py may be used for more in the future, but currently just copies the template config
 
-More documentation will be added as this functionality is improved. right now you can set a single year to pull all data from.
+After copying the example with either method, you are freely able to edit config.py to alter the behaviour of most of the scripts
+
+More documentation will be added as this functionality is improved. right now you can configure a single year to pull all data from. The idea is that it is best to generate a separate database for each year, to allow users to create databases for several seasons and use the same SQL queries between databases with minimal change needed
 
 ** Data pulling scripts
 These scripts pull csv files from various sources and should generally be the first ones you run. You can run as many or as few of these as you'd like
