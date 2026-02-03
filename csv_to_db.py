@@ -41,6 +41,7 @@ fangraphs_team_pitching_ds = DataSource(fangraphs.team_pitching_data_file, "fang
 fangraphs_team_fielding_ds = DataSource(fangraphs.team_fielding_data_file, "fangraphs_team_fielding", fangraphs_team_fielding_definition)
 retrosheet_game_log_ds = DataSource(retrosheet.game_log_file, "retrosheet_game_logs", retrosheet_game_log_definition, index=True, has_header=False, names=retrosheet.game_log_columns)
 retrosheet_park_ds = DataSource(retrosheet.park_codes_file, "retrosheet_park_codes", retrosheet_park_definition)
+retrosheet_team_ds = DataSource(retrosheet.teams_file, "retrosheet_teams", retrosheet_team_definition, has_header = False, names=retrosheet.teams_columns)
 
 # TODO: make a better way to configure this
 data_sources = [
@@ -55,7 +56,8 @@ data_sources = [
     fangraphs_team_pitching_ds,
     fangraphs_team_fielding_ds,
     retrosheet_game_log_ds,
-    retrosheet_park_ds
+    retrosheet_park_ds,
+    retrosheet_team_ds
 ]
 
 db_file = f"{year}_baseball.db"
@@ -76,7 +78,7 @@ for ds in data_sources:
     if ds.exists:
         print(f"  Reading {ds.table_name} CSV: {ds.path}")
         if not ds.has_header:
-            df = pd.read_csv(ds.path,header=0, names=ds.names)
+            df = pd.read_csv(ds.path,header=None, names=ds.names)
         else:
             df = pd.read_csv(ds.path)
         drop_table(ds.table_name)

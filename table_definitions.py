@@ -1993,3 +1993,12 @@ CREATE TABLE "retrosheet_park_codes" (
 	PRIMARY KEY("PARKID")
 );
 """
+retrosheet_team_definition = """
+CREATE TABLE "retrosheet_teams" (
+	"ID"	TEXT,
+	"league"	TEXT,
+	"city"	TEXT,
+	"name"	TEXT,
+	PRIMARY KEY("ID")
+);
+"""

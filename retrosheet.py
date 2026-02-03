@@ -3,19 +3,19 @@
 
 from config import year
 
-from pybaseball import season_game_logs, events, park_codes
-import pybaseball
-import pandas
 from urllib.request import urlretrieve
 
 #pybaseball's implementation of fetching retrosheet is broken so im doing some things manually here
 
-game_log_file = f"retrosheet_game_log_{year}.csv"
-regular_season_event_file = f"retrosheet_events_{year}_RS.csv"
-postseason_event_file = f"retrosheet_events_{year}_PS.csv"
 park_codes_file = "retrosheet_park_codes.csv"
+teams_file = "retrosheet_teams.csv"
+game_log_file = f"retrosheet_game_log_{year}.csv"
 
 parkid_url = 'https://raw.githubusercontent.com/chadwickbureau/retrosheet/master/reference/ballparks.csv'
+
+teams_url = f'https://raw.githubusercontent.com/chadwickbureau/retrosheet/refs/heads/master/seasons/{year}/TEAM{year}'
+
+teams_columns = ['ID', 'League', 'City', 'Name']
 
 game_log_url = f"https://raw.githubusercontent.com/chadwickbureau/retrosheet/refs/heads/master/seasons/{year}/GL{year}.TXT"
 #theres no header in the csv for some reason
@@ -77,6 +77,9 @@ game_log_columns = [
 def main():
     urlretrieve(parkid_url, park_codes_file)
     print(f"downloaded {park_codes_file}")
+    
+    urlretrieve(teams_url, teams_file)
+    print(f"downloaded {teams_file}")
     
     urlretrieve(game_log_url, game_log_file)
     print(f"downloaded {game_log_file}")

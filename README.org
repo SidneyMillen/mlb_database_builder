@@ -17,6 +17,7 @@ The project is mainly a set of scripts that are intended to be run in a specific
 
 ** Configuration
 ⚠️ *You must copy config.example.py to config.py, or most scripts will not be able to run* ⚠️
+
 This can be done either manually, or using setup.py. setup.py may be used for more in the future, but currently just copies the template config
 
 After copying the example with either method, you are freely able to edit config.py to alter the behaviour of most of the scripts
