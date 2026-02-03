@@ -42,17 +42,18 @@ fangraphs_team_fielding_ds = DataSource(fangraphs.team_fielding_data_file, "fang
 retrosheet_game_log_ds = DataSource(retrosheet.game_log_file, "retrosheet_game_logs", retrosheet_game_log_definition, index=True, has_header=False, names=retrosheet.game_log_columns)
 retrosheet_park_ds = DataSource(retrosheet.park_codes_file, "retrosheet_park_codes", retrosheet_park_definition)
 
+# TODO: make a better way to configure this
 data_sources = [
-    # statcast_ds,
-    # chadwick_ds,
-    # bref_batting_ds,
-    # bref_pitching_ds,
-    # fangraphs_batting_ds,
-    # fangraphs_pitching_ds,
-    # fangraphs_fielding_ds,
-    # fangraphs_team_batting_ds,
-    # fangraphs_team_pitching_ds,
-    # fangraphs_team_fielding_ds,
+    statcast_ds,
+    chadwick_ds,
+    bref_batting_ds,
+    bref_pitching_ds,
+    fangraphs_batting_ds,
+    fangraphs_pitching_ds,
+    fangraphs_fielding_ds,
+    fangraphs_team_batting_ds,
+    fangraphs_team_pitching_ds,
+    fangraphs_team_fielding_ds,
     retrosheet_game_log_ds,
     retrosheet_park_ds
 ]
