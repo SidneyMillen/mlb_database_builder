@@ -34,7 +34,8 @@ pulls the [[https://github.com/chadwickbureau/register][Chadwick Register]] to a
 pulls batter and pitcher statlines for the year specified in config.py. writes 2 separate files
 
 *** fangraphs.py
-pulls batting, pitching, and fielding data at both a player and team level. creates 6 csv files
+pulls batting, pitching, and fielding data at both a player and team level. creates 6 csv files.
+_Seems to be currently broken_
 
 *** retrosheet.py
 pulls game logs and a table of ballpark information and codes
