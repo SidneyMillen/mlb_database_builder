@@ -35,12 +35,12 @@ pulls batter and pitcher statlines for the year specified in config.py. writes 2
 
 *** fangraphs.py
 pulls batting, pitching, and fielding data at both a player and team level. creates 6 csv files.
-_Seems to be currently broken_
+_Seems to be currently broken_ (see https://github.com/jldbc/pybaseball/issues/507)
 
 *** retrosheet.py
 pulls game logs and a table of ballpark information and codes
 **** Retrosheet data notice
- The information used here was obtained free of charge from and is copyrighted by Retrosheet.  Interested parties may contact Retrosheet at "www.retrosheet.org".
+ The information used here was obtaiNed free of charge from and is copyrighted by Retrosheet.  Interested parties may contact Retrosheet at "www.retrosheet.org".
 
 *** statcast.py
 pulls the full season of statcast data, including postseason. Currently this will also print a ton of warning messages due to an upstream bug in pybaseball, but it does work.
