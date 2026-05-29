@@ -16,11 +16,11 @@ team_fielding_data_file = f"fangraphs_team_fielding_{year}.csv"
 def main():
     cache.enable()
 
-    batter_data = batting_stats(year)
+    batter_data = batting_stats(year, qual=1)
     batter_data.to_csv(batter_data_file, index=False)
     print(f"Wrote {batter_data_file}")
 
-    pitcher_data = pitching_stats(year)
+    pitcher_data = pitching_stats(year, qual=1)
     pitcher_data.to_csv(pitcher_data_file, index=False)
     print(f"Wrote {pitcher_data_file}")
     
